@@ -1,0 +1,31 @@
+{
+  "name": "obs-avatar-effects",
+  "version": "1.0.0",
+  "description": "Change the background color of our avatar when we talk like discord",
+  "main": "index.js",
+  "bin": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js",
+    "change-icon": "node changeIcon.js"
+  },
+  "keywords": [
+    "obs",
+    "avatar",
+    "discord",
+    "effects"
+  ],
+  "author": "@jeydevlab",
+  "license": "ISC",
+  "dependencies": {
+    "obs-websocket-js": "^5.0.6",
+    "rcedit": "^4.0.1"
+  },
+  "pkg": {
+    "scripts": "index.js",
+    "targets": [
+      "node18"
+    ],
+    "outputPath": "dist"
+  }
+}
