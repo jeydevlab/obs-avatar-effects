@@ -1,9 +1,12 @@
 {
   "server": {
-    "port": 4458,
-    "password": "youpassword"
+    "port": 4455,
+    "password": "yourpassword"
   },
-  "micName": "Mic/Aux",
+  "micSettings": {
+    "name": "mic",
+    "sensibility": 0.02
+  },
   "background": {
     "sourceName": "avatar_background",
     "filterName": "talking"

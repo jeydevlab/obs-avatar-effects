@@ -1,7 +1,7 @@
 const { OBSWebSocket, EventSubscription} = require('obs-websocket-js');
 const { loadConfig } = require('./src/config');
 
-const config = loadConfig();
+const { background, micSettings, server } = loadConfig();
 
 const State = {
 	QUIET: 0,
@@ -17,36 +17,50 @@ async function onStateChange(newState) {
 
 	currentState = newState;
 	await obs.call('SetSourceFilterEnabled', {
-		sourceName: config.background.sourceName,
-		filterName: config.background.filterName,
+		sourceName: background.sourceName,
+		filterName: background.filterName,
 		filterEnabled: currentState === State.TALK,
 	})
 }
 
-const url = 'ws://localhost:' + config.server.port;
+const url = 'ws://localhost:' +server.port;
 const obs = new OBSWebSocket();
-obs.connect(url, config.server.password, {
-	rpcVersion: 1,
-	eventSubscriptions: EventSubscription.All | EventSubscription.InputVolumeMeters
-}).then( () => {
-	console.log('Connected to WebSocket!');
 
-	obs.on('InputVolumeMeters', async volumeMeters => {
-		const mic = volumeMeters.inputs.filter(input => input.inputName === config.micName)[0];
+async function connect() {
+	try {
+		await obs.connect(url, server.password, {
+			rpcVersion: 1,
+			eventSubscriptions: EventSubscription.All | EventSubscription.InputVolumeMeters
+		});
+			console.log('Connected to WebSocket!');
 
-		if (!mic.inputLevelsMul.length) {
-			return;
-		}
+			obs.on('InputVolumeMeters', async volumeMeters => {
+				const mic = volumeMeters.inputs.filter(input => input.inputName === micSettings.name)[0];
 
-		if (mic.inputLevelsMul[0][1] >= 0.05) {
-			await onStateChange(State.TALK);
-		} else {
-			await onStateChange(State.QUIET);
-		}
-	});
-});
+				if (!mic) {
+					return;
+				}
+
+				if (!mic.inputLevelsMul.length) {
+					return;
+				}
+
+				if (mic.inputLevelsMul[0][1] >= micSettings.sensibility) {
+					await onStateChange(State.TALK);
+				} else {
+					await onStateChange(State.QUIET);
+				}
+			});
+
+	} catch (e) {
+		setTimeout(connect, 1000);
+	}
+}
+
+connect();
 
 console.log('Press any key to exit');
 process.stdin.setRawMode(true);
 process.stdin.resume();
 process.stdin.on('data', process.exit.bind(process, 0));
+console.log('Waiting for server connection');
