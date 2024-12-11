@@ -25,6 +25,7 @@ async function onStateChange(newState) {
 
 const url = 'ws://localhost:' +server.port;
 const obs = new OBSWebSocket();
+let connected = false;
 
 async function connect() {
 	try {
@@ -32,6 +33,7 @@ async function connect() {
 			rpcVersion: 1,
 			eventSubscriptions: EventSubscription.All | EventSubscription.InputVolumeMeters
 		});
+		connected = true;
 			console.log('Connected to WebSocket!');
 
 			obs.on('InputVolumeMeters', async volumeMeters => {
@@ -56,6 +58,16 @@ async function connect() {
 		setTimeout(connect, 1000);
 	}
 }
+
+obs.on('ConnectionClosed', async () => {
+	if (connected) {
+		console.log('Connection closed');
+		console.log('Waiting for server connection');
+		connected = false;
+		await connect();
+	}
+
+});
 
 connect();
 
