@@ -2,6 +2,8 @@
 
 This application is about to apply a background effect when you are talking like in discord app.
 
+![](ScreenShot.png)
+
 ## Configuration
 To use the application you have to change the config.json file.
 Replace the following items to fit your obs setup:
